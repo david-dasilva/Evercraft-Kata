@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.EnumMap;
+
+import static java.util.Map.entry;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -167,6 +170,24 @@ class CharacterTest {
         then(player.isDead()).isTrue();
     }
 
+    @Test
+    void character_has_default_abilities() {
+        // Given
+        var player = Character.builder().build();
+
+        // When
+        EnumMap<Ability, AbilityScore> abilities = player.getAbilities();
+
+        // Then
+        then(abilities).containsOnly(
+                entry(Ability.STRENGTH, new AbilityScore(10)),
+                entry(Ability.DEXTERITY, new AbilityScore(10)),
+                entry(Ability.CONSTITUTION, new AbilityScore(10)),
+                entry(Ability.WISDOM, new AbilityScore(10)),
+                entry(Ability.INTELLIGENCE, new AbilityScore(10)),
+                entry(Ability.CHARISMA, new AbilityScore(10))
+                );
+    }
 
 
 
