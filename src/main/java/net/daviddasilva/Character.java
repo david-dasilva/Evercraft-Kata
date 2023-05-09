@@ -15,14 +15,26 @@ public final class Character {
 
 
     public boolean attack(Character opponent, int roll) {
+        boolean attackSuccessful;
         if (roll == 20) {
-            return true;
+            attackSuccessful = true;
+            opponent.takeHit();
         } else {
-            return roll >= opponent.getArmorClass();
+            attackSuccessful = roll >= opponent.getArmorClass();
         }
-
+        if (attackSuccessful) {
+            opponent.takeHit();
+        }
+        return attackSuccessful;
     }
 
+    public void takeHit() {
+        this.hitPoints -= 1;
+    }
+
+    public boolean isDead() {
+        return this.hitPoints <= 0;
+    }
 
 
 }

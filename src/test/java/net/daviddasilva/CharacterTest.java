@@ -1,15 +1,18 @@
 package net.daviddasilva;
 
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class CharacterTest {
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+class CharacterTest {
 
     @Test
-    void canSetAName() {
+    void can_set_a_name() {
         // Given
         var expectedName = "Krom le conquérant";
         // When
@@ -20,14 +23,14 @@ public class CharacterTest {
 
 
     @Test
-    void canSetAlignment() {
+    void can_set_alignment() {
         var character = Character.builder().alignment(Alignment.GOOD).build();
         then(character.getAlignment()).isInstanceOf(Alignment.class);
     }
 
 
     @Test
-    void canHaveArmorClass() {
+    void can_have_armor_class() {
         // Given
         var character = Character.builder().armorClass(15).build();
         // When
@@ -37,7 +40,7 @@ public class CharacterTest {
     }
 
     @Test
-    void canHaveADefaultArmorClass() {
+    void can_have_a_default_armor_class() {
         // Given
         var character = Character.builder().build();
         // When
@@ -47,7 +50,7 @@ public class CharacterTest {
 
 
     @Test
-    void canHaveHitPoints() {
+    void can_have_hit_points() {
         // Given
         var character = Character.builder().hitPoints(10).build();
         // When
@@ -56,7 +59,7 @@ public class CharacterTest {
     }
 
     @Test
-    void canHaveDefaultHitPoints() {
+    void can_have_default_hit_points() {
         // Given
         var character = Character.builder().build();
         // When
@@ -66,7 +69,7 @@ public class CharacterTest {
 
     @ParameterizedTest
     @ValueSource(ints = { 10, 15})
-    void attackShouldSucceedIfRollHigherThanAC(int roll) {
+    void attack_should_succeed_if_roll_higher_than_ac(int roll) {
         // Given
         var opponent = Character.builder().armorClass(10).build();
         var player = Character.builder().build();
@@ -79,7 +82,7 @@ public class CharacterTest {
     }
 
     @Test
-    void attackShouldFailIfRollLowerThanAC() {
+    void attack_should_fail_if_roll_lower_than_ac() {
         // Given
         var opponent = Character.builder().armorClass(10).build();
         var player = Character.builder().build();
@@ -93,7 +96,7 @@ public class CharacterTest {
 
 
     @Test
-    void attackAlwaysSucceedOnRoll20() {
+    void attack_always_succeed_on_roll_20() {
         // Given
         var opponent = Character.builder().armorClass(100).build();
         var player = Character.builder().build();
@@ -103,6 +106,65 @@ public class CharacterTest {
 
         // Then
         then(succeeded).isTrue();
+    }
+
+    @Test
+    void successful_attack_deals_damage() {
+        // Given
+        var opponent = Character.builder()
+                                .armorClass(5)
+                                .hitPoints(5)
+                                .build();
+        var player = Character.builder().build();
+
+        // When
+        boolean succeeded = player.attack(opponent, 15);
+
+        // Then
+        then(succeeded).isTrue();
+        then(opponent.getHitPoints()).isEqualTo(4);
+    }
+
+    @Test
+    void critical_hit_deals_double_damage() {
+        // Given
+        var opponent = Character.builder()
+                                .armorClass(5)
+                                .hitPoints(5)
+                                .build();
+        var player = Character.builder().build();
+
+        // When
+        boolean succeeded = player.attack(opponent, 20);
+
+        // Then
+        then(succeeded).isTrue();
+        then(opponent.getHitPoints()).isEqualTo(3);
+    }
+
+    @Test
+    void character_is_dead_if_hit_points_reach_zero() {
+        // Given
+        var player = Character.builder()
+                              .hitPoints(1)
+                              .build();
+        // When
+        player.takeHit();
+
+        // Then
+        then(player.isDead()).isTrue();
+    }
+
+    @Test
+    void character_is_dead_if_hit_points_below_zero() {
+        // Given
+        var player = Character.builder()
+                              .hitPoints(-1)
+                              .build();
+        // When
+
+        // Then
+        then(player.isDead()).isTrue();
     }
 
 
