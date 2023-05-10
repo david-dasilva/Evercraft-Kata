@@ -1,60 +1,84 @@
 package net.daviddasilva;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-@Builder
-@Data
+@Getter
 public final class Character {
+    public static final int NAT_20 = 20;
+    public static final int BASE_DAMAGE = 1;
 
-    private static final int DEFAULT_ABILITY_SCORE = 10;
-    private static final int DEFAULT_ARMOR_CLASS = 10;
-    private static final int DEFAULT_HIT_POINTS = 5;
-    private static final Map<Ability, AbilityScore> DEFAULT_ABILITIES = Map.of(
-            Ability.STRENGTH, new AbilityScore(),
-            Ability.DEXTERITY, new AbilityScore(),
-            Ability.CONSTITUTION, new AbilityScore(),
-            Ability.WISDOM, new AbilityScore(),
-            Ability.INTELLIGENCE, new AbilityScore(),
-            Ability.CHARISMA, new AbilityScore()
+    private final String name;
+    private final Alignment alignment;
+    private final int armorClass;
+    private final EnumMap<Ability, AbilityScore> abilities;
+    private int hitPoints;
 
-    );
 
-    private String name;
-    private Alignment alignment;
-    @Builder.Default
-    private int armorClass = DEFAULT_ARMOR_CLASS;
-    @Builder.Default
-    private int hitPoints = DEFAULT_HIT_POINTS;
-    @Builder.Default
-    private EnumMap<Ability, AbilityScore> abilities = new EnumMap<>(DEFAULT_ABILITIES);
+    public Character(String name, Alignment alignment, int armorClass, int hitPoints, Map<Ability, AbilityScore> abilities) {
+        this.name = name;
+        this.alignment = alignment;
+        this.armorClass = armorClass + abilities.get(Ability.DEXTERITY).getModifier();
+        this.hitPoints = hitPoints + abilities.get(Ability.CONSTITUTION).getModifier();
+        this.abilities = new EnumMap<>(abilities);
+    }
 
+    public static CharacterBuilder builder() {
+        return new CharacterBuilder();
+    }
 
 
     public boolean attack(Character opponent, int roll) {
-        boolean attackSuccessful;
-        if (roll == 20) {
-            attackSuccessful = true;
-            opponent.takeHit();
-        } else {
-            attackSuccessful = roll >= opponent.getArmorClass();
+        if (roll == NAT_20) {
+            opponent.takeCriticalHit(getStrengthModifier() * 2);
+            return true;
         }
+        boolean attackSuccessful = roll + getStrengthModifier() >= opponent.getArmorClass();
         if (attackSuccessful) {
-            opponent.takeHit();
+            opponent.takeHit(getStrengthModifier());
         }
         return attackSuccessful;
     }
 
-    public void takeHit() {
-        this.hitPoints -= 1;
+    public void takeHit(int opponentModifier) {
+        int damageDealt = BASE_DAMAGE + opponentModifier;
+        if (damageDealt <= 0) {
+            damageDealt = BASE_DAMAGE;
+        }
+        this.hitPoints -= damageDealt;
+    }
+
+    public void takeCriticalHit(int opponentModifier) {
+        int damageDealt = BASE_DAMAGE * 2 + opponentModifier;
+        if (damageDealt <= 0) {
+            damageDealt = BASE_DAMAGE;
+        }
+        this.hitPoints -= damageDealt;
     }
 
     public boolean isDead() {
         return this.hitPoints <= 0;
     }
 
+    public int getStrengthModifier() {
+        return this.abilities.get(Ability.STRENGTH).getModifier();
+    }
+    public int getDexterityModifier() {
+        return this.abilities.get(Ability.DEXTERITY).getModifier();
+    }
+    public int getConstitutionModifier() {
+        return this.abilities.get(Ability.CONSTITUTION).getModifier();
+    }
+    public int getWisdomModifier() {
+        return this.abilities.get(Ability.WISDOM).getModifier();
+    }
+    public int getIntelligenceModifier() {
+        return this.abilities.get(Ability.INTELLIGENCE).getModifier();
+    }
+    public int getCharismaModifier() {
+        return this.abilities.get(Ability.CHARISMA).getModifier();
+    }
 
 }

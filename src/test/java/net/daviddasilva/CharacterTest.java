@@ -1,8 +1,11 @@
 package net.daviddasilva;
 
+import org.assertj.core.api.BDDSoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -11,6 +14,7 @@ import java.util.EnumMap;
 import static java.util.Map.entry;
 import static org.assertj.core.api.BDDAssertions.then;
 
+@ExtendWith(SoftAssertionsExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class CharacterTest {
 
@@ -112,7 +116,7 @@ class CharacterTest {
     }
 
     @Test
-    void successful_attack_deals_damage() {
+    void successful_attack_deals_damage(BDDSoftAssertions softly) {
         // Given
         var opponent = Character.builder()
                                 .armorClass(5)
@@ -124,12 +128,12 @@ class CharacterTest {
         boolean succeeded = player.attack(opponent, 15);
 
         // Then
-        then(succeeded).isTrue();
-        then(opponent.getHitPoints()).isEqualTo(4);
+        softly.then(succeeded).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(4);
     }
 
     @Test
-    void critical_hit_deals_double_damage() {
+    void critical_hit_deals_double_damage(BDDSoftAssertions softly) {
         // Given
         var opponent = Character.builder()
                                 .armorClass(5)
@@ -141,8 +145,8 @@ class CharacterTest {
         boolean succeeded = player.attack(opponent, 20);
 
         // Then
-        then(succeeded).isTrue();
-        then(opponent.getHitPoints()).isEqualTo(3);
+        softly.then(succeeded).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(3);
     }
 
     @Test
@@ -152,7 +156,7 @@ class CharacterTest {
                               .hitPoints(1)
                               .build();
         // When
-        player.takeHit();
+        player.takeHit(0);
 
         // Then
         then(player.isDead()).isTrue();
@@ -162,9 +166,10 @@ class CharacterTest {
     void character_is_dead_if_hit_points_below_zero() {
         // Given
         var player = Character.builder()
-                              .hitPoints(-1)
+                              .hitPoints(1)
                               .build();
         // When
+        player.takeHit(2);
 
         // Then
         then(player.isDead()).isTrue();
@@ -187,6 +192,135 @@ class CharacterTest {
                 entry(Ability.INTELLIGENCE, new AbilityScore(10)),
                 entry(Ability.CHARISMA, new AbilityScore(10))
                 );
+    }
+
+    @Test
+    void strength_modifier_is_applied_to_attack_and_damage_dealt(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder()
+                              .strength(15)
+                              .build();
+
+        var opponent = Character.builder()
+                                .hitPoints(5)
+                                .armorClass(10)
+                                .build();
+
+        // When
+        boolean succeeded = player.attack(opponent, 8);
+
+        // Then
+        softly.then(succeeded).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(2);
+    }
+
+    @Test
+    void strength_modifier_is_applied_to_attack_and_damage_dealt_case_negative(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder().strength(5)
+                              .build();
+
+        var opponent = Character.builder()
+                                .hitPoints(5)
+                                .armorClass(10)
+                                .build();
+
+        // When
+        boolean firstAttackHit = player.attack(opponent, 10);
+        boolean secondAttackHit = player.attack(opponent, 15);
+
+        // Then
+        softly.then(firstAttackHit).isFalse();
+        softly.then(secondAttackHit).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(4);
+    }
+
+    @Test
+    void minimum_damage_is_always_one(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder()
+                              .strength(1)
+                              .build();
+
+        var opponent = Character.builder()
+                                .hitPoints(5)
+                                .armorClass(10)
+                                .build();
+
+        // When
+        boolean succeeded = player.attack(opponent, 19);
+
+        // Then
+        softly.then(succeeded).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(4);
+    }
+
+    @Test
+    void minimum_damage_is_always_one_even_critical(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder()
+                              .strength(1)
+                              .build();
+
+        var opponent = Character.builder()
+                                .hitPoints(5)
+                                .armorClass(10)
+                                .build();
+
+        // When
+        boolean succeeded = player.attack(opponent, 20);
+
+        // Then
+        softly.then(succeeded).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(4);
+    }
+
+    @Test
+    void strength_modifier_is_doubled_on_critical_hit(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder()
+                              .strength(15)
+                              .build();
+
+        var opponent = Character.builder()
+                                .hitPoints(10)
+                                .armorClass(10)
+                                .build();
+
+        // When
+        boolean succeeded = player.attack(opponent, 20);
+
+        // Then
+        softly.then(succeeded).isTrue();
+        softly.then(opponent.getHitPoints()).isEqualTo(4);
+    }
+
+    @Test
+    void dexterity_modifier_is_added_to_armor_class() {
+        // Given
+        var player = Character.builder()
+                              .armorClass(10)
+                              .dexterity(15)
+                              .build();
+        // When
+        int armorClass = player.getArmorClass();
+
+        // Then
+        then(armorClass).isEqualTo(12);
+    }
+
+    @Test
+    void constitution_modifier_is_added_to_hit_points() {
+        // Given
+        var player = Character.builder()
+                .hitPoints(10)
+                .constitution(15)
+                .build();
+        // When
+        int hitPoints = player.getHitPoints();
+
+        // Then
+        then(hitPoints).isEqualTo(12);
     }
 
 
