@@ -15,6 +15,7 @@ public final class Character {
     private final int armorClass;
     private final EnumMap<Ability, AbilityScore> abilities;
     private int hitPoints;
+    private long xp;
 
 
     public Character(String name, Alignment alignment, int armorClass, int hitPoints, Map<Ability, AbilityScore> abilities) {
@@ -30,7 +31,15 @@ public final class Character {
     }
 
 
-    public boolean attack(Character opponent, int roll) {
+    public boolean attemptAttack(Character opponent, int roll) {
+        boolean attackSuccessful = this.attack(opponent, roll);
+        if (attackSuccessful) {
+            gainXP();
+        }
+        return attackSuccessful;
+    }
+
+    private boolean attack(Character opponent, int roll) {
         if (roll == NAT_20) {
             opponent.takeCriticalHit(getStrengthModifier() * 2);
             return true;
@@ -79,6 +88,14 @@ public final class Character {
     }
     public int getCharismaModifier() {
         return this.abilities.get(Ability.CHARISMA).getModifier();
+    }
+
+    public long getCurrentXP() {
+        return this.xp;
+    }
+
+    private void gainXP() {
+        this.xp += 10;
     }
 
 }

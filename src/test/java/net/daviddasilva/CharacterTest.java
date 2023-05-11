@@ -82,7 +82,7 @@ class CharacterTest {
         var player = Character.builder().build();
 
         // When
-        boolean succeeded = player.attack(opponent, roll);
+        boolean succeeded = player.attemptAttack(opponent, roll);
 
         // Then
         then(succeeded).isTrue();
@@ -95,7 +95,7 @@ class CharacterTest {
         var player = Character.builder().build();
 
         // When
-        boolean succeeded = player.attack(opponent, 5);
+        boolean succeeded = player.attemptAttack(opponent, 5);
 
         // Then
         then(succeeded).isFalse();
@@ -109,7 +109,7 @@ class CharacterTest {
         var player = Character.builder().build();
 
         // When
-        boolean succeeded = player.attack(opponent, 20);
+        boolean succeeded = player.attemptAttack(opponent, 20);
 
         // Then
         then(succeeded).isTrue();
@@ -125,7 +125,7 @@ class CharacterTest {
         var player = Character.builder().build();
 
         // When
-        boolean succeeded = player.attack(opponent, 15);
+        boolean succeeded = player.attemptAttack(opponent, 15);
 
         // Then
         softly.then(succeeded).isTrue();
@@ -142,7 +142,7 @@ class CharacterTest {
         var player = Character.builder().build();
 
         // When
-        boolean succeeded = player.attack(opponent, 20);
+        boolean succeeded = player.attemptAttack(opponent, 20);
 
         // Then
         softly.then(succeeded).isTrue();
@@ -207,7 +207,7 @@ class CharacterTest {
                                 .build();
 
         // When
-        boolean succeeded = player.attack(opponent, 8);
+        boolean succeeded = player.attemptAttack(opponent, 8);
 
         // Then
         softly.then(succeeded).isTrue();
@@ -226,8 +226,8 @@ class CharacterTest {
                                 .build();
 
         // When
-        boolean firstAttackHit = player.attack(opponent, 10);
-        boolean secondAttackHit = player.attack(opponent, 15);
+        boolean firstAttackHit = player.attemptAttack(opponent, 10);
+        boolean secondAttackHit = player.attemptAttack(opponent, 15);
 
         // Then
         softly.then(firstAttackHit).isFalse();
@@ -248,7 +248,7 @@ class CharacterTest {
                                 .build();
 
         // When
-        boolean succeeded = player.attack(opponent, 19);
+        boolean succeeded = player.attemptAttack(opponent, 19);
 
         // Then
         softly.then(succeeded).isTrue();
@@ -268,7 +268,7 @@ class CharacterTest {
                                 .build();
 
         // When
-        boolean succeeded = player.attack(opponent, 20);
+        boolean succeeded = player.attemptAttack(opponent, 20);
 
         // Then
         softly.then(succeeded).isTrue();
@@ -288,7 +288,7 @@ class CharacterTest {
                                 .build();
 
         // When
-        boolean succeeded = player.attack(opponent, 20);
+        boolean succeeded = player.attemptAttack(opponent, 20);
 
         // Then
         softly.then(succeeded).isTrue();
@@ -323,6 +323,33 @@ class CharacterTest {
         then(hitPoints).isEqualTo(12);
     }
 
+    @Test
+    void should_gain_experience_when_attack_landed(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder().build();
+        var opponent = Character.builder().build();
+
+        // When
+        boolean attackSuccessful = player.attemptAttack(opponent, 15);
+
+        // Then
+        softly.then(attackSuccessful).isTrue();
+        softly.then(player.getCurrentXP()).isEqualTo(10);
+    }
+
+    @Test
+    void should_not_gain_experience_when_attack_fails(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder().build();
+        var opponent = Character.builder().build();
+
+        // When
+        boolean attackSuccessful = player.attemptAttack(opponent, 1);
+
+        // Then
+        softly.then(attackSuccessful).isFalse();
+        softly.then(player.getCurrentXP()).isZero();
+    }
 
 
 }
