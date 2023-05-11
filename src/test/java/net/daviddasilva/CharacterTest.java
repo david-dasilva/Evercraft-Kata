@@ -351,5 +351,30 @@ class CharacterTest {
         softly.then(player.getCurrentXP()).isZero();
     }
 
+    @Test
+    void character_should_be_level_1_by_default() {
+        // Given
+        var player = Character.builder().build();
+
+        // When
+        int level = player.getLevel();
+
+        // Then
+        then(level).isOne();
+    }
+
+    @Test
+    void character_gain_one_level_every_1000xp(BDDSoftAssertions softly) {
+        // Given
+        var player = Character.builder().build();
+
+        // When
+        player.gainXP(1000);
+        softly.then(player.getLevel()).isEqualTo(2);
+        player.gainXP(1000);
+        softly.then(player.getLevel()).isEqualTo(3);
+
+    }
+
 
 }

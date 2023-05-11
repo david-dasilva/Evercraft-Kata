@@ -2,12 +2,12 @@ package net.daviddasilva;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class CharacterBuilder {
 
     private static final int DEFAULT_ARMOR_CLASS = 10;
     private static final int DEFAULT_HIT_POINTS = 5;
+    private static final int DEFAULT_LEVEL = 1;
     private static final int MINIMAL_HIT_POINTS = 1;
     private static final Map<Ability, AbilityScore> DEFAULT_ABILITIES = Map.of(
             Ability.STRENGTH, new AbilityScore(),
@@ -23,9 +23,10 @@ public class CharacterBuilder {
 
     private String name;
     private Alignment alignment;
-    private Integer armorClass;
-    private Integer hitPoints;
+    private int armorClass = DEFAULT_ARMOR_CLASS;
+    private int hitPoints = DEFAULT_HIT_POINTS;
     private final EnumMap<Ability, AbilityScore> abilities;
+    private int level = DEFAULT_LEVEL;
 
     CharacterBuilder() {
         this.abilities = new EnumMap<>(DEFAULT_ABILITIES);
@@ -81,10 +82,12 @@ public class CharacterBuilder {
         return this;
     }
 
-    public Character build() {
-        int armorClassValue = Objects.requireNonNullElse(this.armorClass, DEFAULT_ARMOR_CLASS);
-        int hitPointsValue = Objects.requireNonNullElse(this.hitPoints, DEFAULT_HIT_POINTS);
+    public CharacterBuilder level(int level) {
+        this.level = level;
+        return this;
+    }
 
-        return new Character(this.name, this.alignment, armorClassValue, hitPointsValue, abilities);
+    public Character build() {
+        return new Character(this.name, this.alignment, armorClass, hitPoints, abilities, level);
     }
 }

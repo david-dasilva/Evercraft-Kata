@@ -9,6 +9,8 @@ import java.util.Map;
 public final class Character {
     public static final int NAT_20 = 20;
     public static final int BASE_DAMAGE = 1;
+    public static final int XP_FOR_ATTACK = 10;
+    public static final int LEVEL_THRESHOLD_XP = 1000;
 
     private final String name;
     private final Alignment alignment;
@@ -16,14 +18,16 @@ public final class Character {
     private final EnumMap<Ability, AbilityScore> abilities;
     private int hitPoints;
     private long xp;
+    private int level;
 
 
-    public Character(String name, Alignment alignment, int armorClass, int hitPoints, Map<Ability, AbilityScore> abilities) {
+    public Character(String name, Alignment alignment, int armorClass, int hitPoints, Map<Ability, AbilityScore> abilities, int level) {
         this.name = name;
         this.alignment = alignment;
         this.armorClass = armorClass + abilities.get(Ability.DEXTERITY).getModifier();
         this.hitPoints = hitPoints + abilities.get(Ability.CONSTITUTION).getModifier();
         this.abilities = new EnumMap<>(abilities);
+        this.level = level;
     }
 
     public static CharacterBuilder builder() {
@@ -34,7 +38,7 @@ public final class Character {
     public boolean attemptAttack(Character opponent, int roll) {
         boolean attackSuccessful = this.attack(opponent, roll);
         if (attackSuccessful) {
-            gainXP();
+            gainXP(XP_FOR_ATTACK);
         }
         return attackSuccessful;
     }
@@ -94,8 +98,20 @@ public final class Character {
         return this.xp;
     }
 
-    private void gainXP() {
-        this.xp += 10;
+    public void gainXP(long xp) {
+        long previousXp = this.xp;
+        this.xp += xp;
+        int nextLevelThreshold = this.level * LEVEL_THRESHOLD_XP;
+        if ((previousXp / nextLevelThreshold < 1) && (this.xp / nextLevelThreshold >= 1)) {
+            this.levelUp();
+        }
+    }
+
+    private void levelUp() {
+        this.level += 1;
+    }
+    public int getLevel() {
+        return level;
     }
 
 }
