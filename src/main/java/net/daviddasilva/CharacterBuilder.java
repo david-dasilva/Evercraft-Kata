@@ -87,7 +87,7 @@ public class CharacterBuilder {
         return this;
     }
 
-    public Character build() {
-        return new Character(this.name, this.alignment, armorClass, hitPoints, abilities, level);
+    public Hero build() {
+        return new Hero(this.name, this.alignment, armorClass, hitPoints, abilities, level);
     }
 }

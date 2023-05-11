@@ -2,11 +2,13 @@ package net.daviddasilva;
 
 import org.assertj.core.api.BDDSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.EnumMap;
@@ -14,72 +16,73 @@ import java.util.EnumMap;
 import static java.util.Map.entry;
 import static org.assertj.core.api.BDDAssertions.then;
 
+@DisplayName("A Hero")
 @ExtendWith(SoftAssertionsExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class CharacterTest {
+class HeroTest {
 
     @Test
     void can_set_a_name() {
         // Given
         var expectedName = "Krom le conquérant";
         // When
-        var character = Character.builder().name(expectedName).build();
+        var hero = Hero.builder().name(expectedName).build();
         // Then
-        then(character.getName()).isEqualTo(expectedName);
+        then(hero.getName()).isEqualTo(expectedName);
     }
 
 
     @Test
     void can_set_alignment() {
-        var character = Character.builder().alignment(Alignment.GOOD).build();
-        then(character.getAlignment()).isInstanceOf(Alignment.class);
+        var hero = Hero.builder().alignment(Alignment.GOOD).build();
+        then(hero.getAlignment()).isInstanceOf(Alignment.class);
     }
 
 
     @Test
     void can_have_armor_class() {
         // Given
-        var character = Character.builder().armorClass(15).build();
+        var hero = Hero.builder().armorClass(15).build();
         // When
 
         // Then
-        then(character.getArmorClass()).isEqualTo(15);
+        then(hero.getArmorClass()).isEqualTo(15);
     }
 
     @Test
     void can_have_a_default_armor_class() {
         // Given
-        var character = Character.builder().build();
+        var hero = Hero.builder().build();
         // When
         // Then
-        then(character.getArmorClass()).isEqualTo(10);
+        then(hero.getArmorClass()).isEqualTo(10);
     }
 
 
     @Test
     void can_have_hit_points() {
         // Given
-        var character = Character.builder().hitPoints(10).build();
+        var hero = Hero.builder().hitPoints(10).build();
         // When
         // Then
-        then(character.getHitPoints()).isEqualTo(10);
+        then(hero.getHitPoints()).isEqualTo(10);
     }
 
     @Test
-    void can_have_default_hit_points() {
+    void has_5_hit_points_by_default() {
         // Given
-        var character = Character.builder().build();
+        var hero = Hero.builder().build();
         // When
         // Then
-        then(character.getHitPoints()).isEqualTo(5);
+        then(hero.getHitPoints()).isEqualTo(5);
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 10, 15})
     void attack_should_succeed_if_roll_higher_than_ac(int roll) {
         // Given
-        var opponent = Character.builder().armorClass(10).build();
-        var player = Character.builder().build();
+        var opponent = Hero.builder().armorClass(10).build();
+        var player = Hero.builder().build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, roll);
@@ -91,8 +94,8 @@ class CharacterTest {
     @Test
     void attack_should_fail_if_roll_lower_than_ac() {
         // Given
-        var opponent = Character.builder().armorClass(10).build();
-        var player = Character.builder().build();
+        var opponent = Hero.builder().armorClass(10).build();
+        var player = Hero.builder().build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 5);
@@ -105,8 +108,8 @@ class CharacterTest {
     @Test
     void attack_always_succeed_on_roll_20() {
         // Given
-        var opponent = Character.builder().armorClass(100).build();
-        var player = Character.builder().build();
+        var opponent = Hero.builder().armorClass(100).build();
+        var player = Hero.builder().build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 20);
@@ -118,11 +121,11 @@ class CharacterTest {
     @Test
     void successful_attack_deals_damage(BDDSoftAssertions softly) {
         // Given
-        var opponent = Character.builder()
-                                .armorClass(5)
-                                .hitPoints(5)
-                                .build();
-        var player = Character.builder().build();
+        var opponent = Hero.builder()
+                           .armorClass(5)
+                           .hitPoints(5)
+                           .build();
+        var player = Hero.builder().build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 15);
@@ -135,11 +138,11 @@ class CharacterTest {
     @Test
     void critical_hit_deals_double_damage(BDDSoftAssertions softly) {
         // Given
-        var opponent = Character.builder()
-                                .armorClass(5)
-                                .hitPoints(5)
-                                .build();
-        var player = Character.builder().build();
+        var opponent = Hero.builder()
+                           .armorClass(5)
+                           .hitPoints(5)
+                           .build();
+        var player = Hero.builder().build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 20);
@@ -150,11 +153,11 @@ class CharacterTest {
     }
 
     @Test
-    void character_is_dead_if_hit_points_reach_zero() {
+    void hero_is_dead_if_hit_points_reach_zero() {
         // Given
-        var player = Character.builder()
-                              .hitPoints(1)
-                              .build();
+        var player = Hero.builder()
+                         .hitPoints(1)
+                         .build();
         // When
         player.takeHit(0);
 
@@ -163,11 +166,11 @@ class CharacterTest {
     }
 
     @Test
-    void character_is_dead_if_hit_points_below_zero() {
+    void is_dead_if_hit_points_below_zero() {
         // Given
-        var player = Character.builder()
-                              .hitPoints(1)
-                              .build();
+        var player = Hero.builder()
+                         .hitPoints(1)
+                         .build();
         // When
         player.takeHit(2);
 
@@ -176,9 +179,9 @@ class CharacterTest {
     }
 
     @Test
-    void character_has_default_abilities() {
+    void hero_has_default_abilities() {
         // Given
-        var player = Character.builder().build();
+        var player = Hero.builder().build();
 
         // When
         EnumMap<Ability, AbilityScore> abilities = player.getAbilities();
@@ -197,14 +200,14 @@ class CharacterTest {
     @Test
     void strength_modifier_is_applied_to_attack_and_damage_dealt(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder()
-                              .strength(15)
-                              .build();
+        var player = Hero.builder()
+                         .strength(15)
+                         .build();
 
-        var opponent = Character.builder()
-                                .hitPoints(5)
-                                .armorClass(10)
-                                .build();
+        var opponent = Hero.builder()
+                           .hitPoints(5)
+                           .armorClass(10)
+                           .build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 8);
@@ -217,13 +220,13 @@ class CharacterTest {
     @Test
     void strength_modifier_is_applied_to_attack_and_damage_dealt_case_negative(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder().strength(5)
-                              .build();
+        var player = Hero.builder().strength(5)
+                         .build();
 
-        var opponent = Character.builder()
-                                .hitPoints(5)
-                                .armorClass(10)
-                                .build();
+        var opponent = Hero.builder()
+                           .hitPoints(5)
+                           .armorClass(10)
+                           .build();
 
         // When
         boolean firstAttackHit = player.attemptAttack(opponent, 10);
@@ -238,14 +241,14 @@ class CharacterTest {
     @Test
     void minimum_damage_is_always_one(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder()
-                              .strength(1)
-                              .build();
+        var player = Hero.builder()
+                         .strength(1)
+                         .build();
 
-        var opponent = Character.builder()
-                                .hitPoints(5)
-                                .armorClass(10)
-                                .build();
+        var opponent = Hero.builder()
+                           .hitPoints(5)
+                           .armorClass(10)
+                           .build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 19);
@@ -258,14 +261,14 @@ class CharacterTest {
     @Test
     void minimum_damage_is_always_one_even_critical(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder()
-                              .strength(1)
-                              .build();
+        var player = Hero.builder()
+                         .strength(1)
+                         .build();
 
-        var opponent = Character.builder()
-                                .hitPoints(5)
-                                .armorClass(10)
-                                .build();
+        var opponent = Hero.builder()
+                           .hitPoints(5)
+                           .armorClass(10)
+                           .build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 20);
@@ -278,14 +281,14 @@ class CharacterTest {
     @Test
     void strength_modifier_is_doubled_on_critical_hit(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder()
-                              .strength(15)
-                              .build();
+        var player = Hero.builder()
+                         .strength(15)
+                         .build();
 
-        var opponent = Character.builder()
-                                .hitPoints(10)
-                                .armorClass(10)
-                                .build();
+        var opponent = Hero.builder()
+                           .hitPoints(10)
+                           .armorClass(10)
+                           .build();
 
         // When
         boolean succeeded = player.attemptAttack(opponent, 20);
@@ -298,10 +301,10 @@ class CharacterTest {
     @Test
     void dexterity_modifier_is_added_to_armor_class() {
         // Given
-        var player = Character.builder()
-                              .armorClass(10)
-                              .dexterity(15)
-                              .build();
+        var player = Hero.builder()
+                         .armorClass(10)
+                         .dexterity(15)
+                         .build();
         // When
         int armorClass = player.getArmorClass();
 
@@ -312,10 +315,10 @@ class CharacterTest {
     @Test
     void constitution_modifier_is_added_to_hit_points() {
         // Given
-        var player = Character.builder()
-                .hitPoints(10)
-                .constitution(15)
-                .build();
+        var player = Hero.builder()
+                         .hitPoints(10)
+                         .constitution(15)
+                         .build();
         // When
         int hitPoints = player.getHitPoints();
 
@@ -326,8 +329,8 @@ class CharacterTest {
     @Test
     void should_gain_experience_when_attack_landed(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder().build();
-        var opponent = Character.builder().build();
+        var player = Hero.builder().build();
+        var opponent = Hero.builder().build();
 
         // When
         boolean attackSuccessful = player.attemptAttack(opponent, 15);
@@ -340,8 +343,8 @@ class CharacterTest {
     @Test
     void should_not_gain_experience_when_attack_fails(BDDSoftAssertions softly) {
         // Given
-        var player = Character.builder().build();
-        var opponent = Character.builder().build();
+        var player = Hero.builder().build();
+        var opponent = Hero.builder().build();
 
         // When
         boolean attackSuccessful = player.attemptAttack(opponent, 1);
@@ -352,9 +355,9 @@ class CharacterTest {
     }
 
     @Test
-    void character_should_be_level_1_by_default() {
+    void should_be_level_1_by_default() {
         // Given
-        var player = Character.builder().build();
+        var player = Hero.builder().build();
 
         // When
         int level = player.getLevel();
@@ -363,16 +366,46 @@ class CharacterTest {
         then(level).isOne();
     }
 
-    @Test
-    void character_gain_one_level_every_1000xp(BDDSoftAssertions softly) {
+    @ParameterizedTest(name = "so gaining {0} xp should get to level {1}")
+    @CsvSource(textBlock = """
+            0,1
+            1000,2
+            2500,3
+            5000, 6
+            """)
+    void should_gain_one_level_every_1000xp(int xp, int expectedLevel) {
         // Given
-        var player = Character.builder().build();
+        var player = Hero.builder().build();
+        var dummy = Hero.builder()
+                        .armorClass(1)
+                        .hitPoints(9999)
+                        .build();
 
         // When
-        player.gainXP(1000);
-        softly.then(player.getLevel()).isEqualTo(2);
-        player.gainXP(1000);
-        softly.then(player.getLevel()).isEqualTo(3);
+        while(player.getXp() < xp) {
+            player.attemptAttack(dummy, 15);
+        }
+
+        // Then
+        then(player.getLevel()).isEqualTo(expectedLevel);
+    }
+
+    @ParameterizedTest(name = "at level {0} with 15 CON and 10 starting HP has {1} total HP")
+    @CsvSource(textBlock = """
+            1, 12
+            2, 19
+            3, 26
+            """)
+    void hero_gains_hitPoints_when_leveling_up(int level, int expectedHitPoints) {
+        // Given
+        var player = Hero.builder()
+                         .level(level)
+                         .hitPoints(10)
+                         .constitution(15) // +2
+                         .build();
+
+        // Then
+        then(player.getHitPoints()).isEqualTo(expectedHitPoints);
 
     }
 
