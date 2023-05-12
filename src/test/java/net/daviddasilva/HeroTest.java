@@ -406,6 +406,34 @@ class HeroTest {
 
         // Then
         then(player.getHitPoints()).isEqualTo(expectedHitPoints);
+    }
+
+    @ParameterizedTest(name = "at level {0} the bonus is +{1}")
+    @CsvSource(textBlock = """
+            1, 0
+            2, 1
+            3, 1
+            4, 2
+            5, 2
+            6, 3
+            7, 3
+            """)
+    void hero_gains_a_bonus_on_attack_rolls_at_even_levels(int level, int expectedBonus){
+        //Given
+        var player = Hero.builder()
+                         .level(level)
+                         .build();
+
+        // The AC increases with the player level so it becomes more difficult to hit
+        var dummy = Hero.builder()
+                        .armorClass(10 + expectedBonus)
+                        .build();
+
+        // When
+        boolean attackSucceeded = player.attemptAttack(dummy, 10);
+
+        // Then
+        then(attackSucceeded).isTrue();
 
     }
 

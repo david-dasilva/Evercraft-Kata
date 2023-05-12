@@ -19,6 +19,7 @@ public final class Hero {
     private int hitPoints;
     private long xp;
     private int level;
+    private int attackBonus;
 
 
     public Hero(String name, Alignment alignment, int armorClass, int hitPoints, Map<Ability, AbilityScore> abilities, int level) {
@@ -29,6 +30,7 @@ public final class Hero {
         this.abilities = new EnumMap<>(abilities);
 
         if (level > 1) {
+            this.level = 1;
             for (int i = 1; i < level; i++) {
                 levelUp();
             }
@@ -55,7 +57,7 @@ public final class Hero {
             opponent.takeCriticalHit(getStrengthModifier() * 2);
             return true;
         }
-        boolean attackSuccessful = roll + getStrengthModifier() >= opponent.getArmorClass();
+        boolean attackSuccessful = roll + getStrengthModifier() + this.attackBonus >= opponent.getArmorClass();
         if (attackSuccessful) {
             opponent.takeHit(getStrengthModifier());
         }
@@ -121,6 +123,9 @@ public final class Hero {
     private void levelUp() {
         this.level += 1;
         this.hitPoints += 5 + getConstitutionModifier();
+        if (level % 2 == 0) {
+            this.attackBonus++;
+        }
     }
     public int getLevel() {
         return level;
